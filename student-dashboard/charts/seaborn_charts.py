@@ -13,21 +13,24 @@ import pandas as pd
 import seaborn as sns
 
 import config
+from theme import MPL_THEME, SEABORN_STYLE
 
-DARK_BG = "#1a1d20"
 
-
-def _fig_to_base64(fig: plt.Figure) -> str:
+def _fig_to_base64(fig: plt.Figure, bg: str) -> str:
     buffer = io.BytesIO()
-    fig.savefig(buffer, format="png", bbox_inches="tight", facecolor=DARK_BG)
+    fig.savefig(buffer, format="png", bbox_inches="tight", facecolor=bg)
     buffer.seek(0)
     encoded = base64.b64encode(buffer.read()).decode()
     plt.close(fig)
     return f"data:image/png;base64,{encoded}"
 
 
-def build_violin_plot(df: pd.DataFrame) -> str:
+def build_violin_plot(df: pd.DataFrame, theme: str = "dark") -> str:
     """Violin plot of score distributions per subject."""
+    colors = MPL_THEME.get(theme, MPL_THEME["dark"])
+    bg = colors["bg"]
+    text = colors["text"]
+
     long_df = df.melt(
         id_vars=["Student"],
         value_vars=config.SUBJECT_COLS,
@@ -35,8 +38,11 @@ def build_violin_plot(df: pd.DataFrame) -> str:
         value_name="Marks",
     )
 
-    sns.set_theme(style="darkgrid", rc={"axes.facecolor": DARK_BG, "figure.facecolor": DARK_BG})
-    fig, ax = plt.subplots(figsize=(8, 4.5), facecolor=DARK_BG)
+    sns.set_theme(
+        style=SEABORN_STYLE.get(theme, "darkgrid"),
+        rc={"axes.facecolor": bg, "figure.facecolor": bg},
+    )
+    fig, ax = plt.subplots(figsize=(8, 4.5), facecolor=bg)
 
     sns.violinplot(
         data=long_df,
@@ -49,10 +55,10 @@ def build_violin_plot(df: pd.DataFrame) -> str:
         legend=False,
     )
 
-    ax.set_title("Score Distribution by Subject (Seaborn)", color="white", fontsize=14)
-    ax.set_xlabel("Subject", color="#adb5bd")
-    ax.set_ylabel("Marks", color="#adb5bd")
-    ax.tick_params(colors="#adb5bd")
+    ax.set_title("Score Distribution by Subject (Seaborn)", color=text, fontsize=14)
+    ax.set_xlabel("Subject", color=text)
+    ax.set_ylabel("Marks", color=text)
+    ax.tick_params(colors=text)
 
     fig.tight_layout()
-    return _fig_to_base64(fig)
+    return _fig_to_base64(fig, bg)

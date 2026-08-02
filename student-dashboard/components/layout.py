@@ -24,6 +24,7 @@ def create_layout(student_list: list[str]) -> dbc.Container:
         [
             dcc.Store(id="active-page", data="overview"),
             dcc.Store(id="filter-store", data={}),
+            dcc.Store(id="theme-store", data="dark"),
             dcc.Download(id="download-csv"),
             dcc.Download(id="download-html"),
             dbc.Row(

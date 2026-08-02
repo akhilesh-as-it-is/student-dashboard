@@ -19,14 +19,18 @@ from components.layout import (
     overview_page_layout,
     student_page_layout,
 )
+from theme import TABLE_STYLES, resolve_theme
 
 
-def _dataframe_table(df: pd.DataFrame, table_id: str = "table") -> dash_table.DataTable:
+def _dataframe_table(
+    df: pd.DataFrame, table_id: str = "table", theme: str = "dark"
+) -> dash_table.DataTable:
     display_cols = [
         "Rank", "Student", "Python", "SQL", "Power BI", "AI",
         "Attendance", "Total", "Average", "Grade",
     ]
     display_cols = [c for c in display_cols if c in df.columns]
+    styles = TABLE_STYLES.get(theme, TABLE_STYLES["dark"])
 
     style_cond = [
         {
@@ -49,20 +53,21 @@ def _dataframe_table(df: pd.DataFrame, table_id: str = "table") -> dash_table.Da
         filter_action="native",
         page_size=10,
         style_table={"overflowX": "auto"},
-        style_header={
-            "backgroundColor": "#1e2226",
-            "color": "#adb5bd",
-            "fontWeight": "bold",
-            "border": "1px solid #2b3035",
-        },
-        style_cell={
-            "backgroundColor": "#15181b",
-            "color": "#f8f9fa",
-            "border": "1px solid #2b3035",
-            "textAlign": "center",
-            "padding": "8px",
-        },
+        style_header=styles["header"],
+        style_cell=styles["cell"],
         style_data_conditional=style_cond,
+    )
+
+
+def _raw_data_table(raw_df: pd.DataFrame, theme: str = "dark") -> dash_table.DataTable:
+    styles = TABLE_STYLES.get(theme, TABLE_STYLES["dark"])
+    return dash_table.DataTable(
+        columns=[{"name": c, "id": c} for c in raw_df.columns],
+        data=raw_df.fillna("Null").to_dict("records"),
+        page_size=10,
+        style_table={"overflowX": "auto"},
+        style_header=styles["header"],
+        style_cell=styles["cell"],
     )
 
 
@@ -87,6 +92,19 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
     """Register all dashboard callbacks."""
     student_list = df["Student"].tolist()
     topper = df.loc[df["Rank"] == 1, "Student"].iloc[0]
+
+    # --- Theme switcher (clientside: body class + label + store) ---
+    app.clientside_callback(
+        """
+        function(is_light) {
+            document.body.classList.toggle('light-mode', is_light);
+            document.body.classList.toggle('dark-mode', !is_light);
+            return [is_light ? 'Dark Mode' : 'Light Mode', is_light ? 'light' : 'dark'];
+        }
+        """,
+        [Output("theme-switch", "label"), Output("theme-store", "data")],
+        Input("theme-switch", "value"),
+    )
 
     # --- Page navigation ---
     @app.callback(
@@ -152,18 +170,20 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         Output("chart-avg-hist", "figure"),
         Output("chart-subject-line", "figure"),
         Input("active-page", "data"),
+        Input("theme-switch", "value"),
     )
-    def update_overview(page):
+    def update_overview(page, is_light):
         if page != "overview":
             return no_update, no_update, no_update, no_update, no_update
 
+        theme = resolve_theme(is_light)
         kpis = compute_kpis(df)
         return (
             build_kpi_cards(kpis),
-            plotly_charts.build_grade_pie(df),
-            plotly_charts.build_subject_bar(df),
-            plotly_charts.build_average_histogram(df),
-            plotly_charts.build_subject_line(df),
+            plotly_charts.build_grade_pie(df, theme),
+            plotly_charts.build_subject_bar(df, theme),
+            plotly_charts.build_average_histogram(df, theme),
+            plotly_charts.build_subject_line(df, theme),
         )
 
     # --- Student explorer ---
@@ -178,11 +198,13 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         Input("compare-dropdown-visible", "value"),
         Input("subject-dropdown-visible", "value"),
         Input("active-page", "data"),
+        Input("theme-switch", "value"),
     )
-    def update_student_page(student, compare_student, subject, page):
+    def update_student_page(student, compare_student, subject, page, is_light):
         if page != "student":
             return no_update, no_update, no_update, no_update, no_update, no_update
 
+        theme = resolve_theme(is_light)
         student = student or student_list[0]
         compare_student = compare_student or (student_list[1] if len(student_list) > 1 else student)
 
@@ -223,17 +245,15 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         )
 
         filtered_df = df
-        if subject and subject != "All":
-            filtered_df = df  # subject filter affects display context only
 
         return (
             profile,
-            plotly_charts.build_student_bar(filtered_df, student),
-            plotly_charts.build_radar_chart(filtered_df, student),
+            plotly_charts.build_student_bar(filtered_df, student, theme),
+            plotly_charts.build_radar_chart(filtered_df, student, theme),
             plotly_charts.build_attendance_scatter(
-                filtered_df, highlight_student=student, topper=topper
+                filtered_df, highlight_student=student, topper=topper, theme=theme
             ),
-            plotly_charts.build_compare_bar(filtered_df, student, compare_student),
+            plotly_charts.build_compare_bar(filtered_df, student, compare_student, theme),
             _simple_table(
                 df[df["Student"].isin([student, compare_student])][
                     ["Student", "Average", "Attendance", "Grade", "Rank"]
@@ -251,18 +271,20 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         Output("chart-mpl", "src"),
         Output("chart-seaborn", "src"),
         Input("active-page", "data"),
+        Input("theme-switch", "value"),
     )
-    def update_analytics(page):
+    def update_analytics(page, is_light):
         if page != "analytics":
             return no_update, no_update, no_update, no_update, no_update, no_update
 
+        theme = resolve_theme(is_light)
         return (
-            plotly_charts.build_correlation_heatmap(df),
-            plotly_charts.build_box_plot(df),
-            plotly_charts.build_bubble_chart(df),
-            plotly_charts.build_area_chart(df),
-            mpl_charts.build_grouped_bar_with_error(df),
-            seaborn_charts.build_violin_plot(df),
+            plotly_charts.build_correlation_heatmap(df, theme),
+            plotly_charts.build_box_plot(df, theme),
+            plotly_charts.build_bubble_chart(df, theme),
+            plotly_charts.build_area_chart(df, theme),
+            mpl_charts.build_grouped_bar_with_error(df, theme),
+            seaborn_charts.build_violin_plot(df, theme),
         )
 
     # --- Insights page ---
@@ -273,11 +295,13 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         Output("chart-insight-bar", "figure"),
         Output("insight-side-panel", "children"),
         Input("active-page", "data"),
+        Input("theme-switch", "value"),
     )
-    def update_insights(page):
+    def update_insights(page, is_light):
         if page != "insights":
             return no_update, no_update, no_update, no_update, no_update
 
+        theme = resolve_theme(is_light)
         insights = get_insights(df)
 
         alerts = dbc.Row(
@@ -349,7 +373,7 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
             alerts,
             _simple_table(insights["top5"], ["Rank", "Student", "Average", "Grade", "Attendance"]),
             _simple_table(insights["bottom5"], ["Rank", "Student", "Average", "Grade", "Attendance"]),
-            plotly_charts.build_subject_insight_bar(insights["subject_averages"]),
+            plotly_charts.build_subject_insight_bar(insights["subject_averages"], theme),
             side_panel,
         )
 
@@ -365,11 +389,13 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
         Input("avg-slider-visible", "value"),
         Input("att-slider-visible", "value"),
         Input("grade-filter-visible", "value"),
+        Input("theme-switch", "value"),
     )
-    def update_data_page(page, search, min_avg, min_att, grades):
+    def update_data_page(page, search, min_avg, min_att, grades, is_light):
         if page != "data":
             return no_update, no_update, no_update, no_update, no_update
 
+        theme = resolve_theme(is_light)
         filtered = filter_dataframe(
             df,
             search=search or "",
@@ -414,29 +440,12 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
             className="text-light",
         )
 
-        raw_table = dash_table.DataTable(
-            columns=[{"name": c, "id": c} for c in raw_df.columns],
-            data=raw_df.fillna("Null").to_dict("records"),
-            page_size=10,
-            style_table={"overflowX": "auto"},
-            style_header={
-                "backgroundColor": "#1e2226",
-                "color": "#adb5bd",
-                "fontWeight": "bold",
-            },
-            style_cell={
-                "backgroundColor": "#15181b",
-                "color": "#f8f9fa",
-                "textAlign": "center",
-            },
-        )
-
         return (
             audit_panel,
             audit.get("raw_inspection", {}).get("info", "No info available."),
             describe_table,
-            _dataframe_table(filtered, "processed-table"),
-            raw_table,
+            _dataframe_table(filtered, "processed-table", theme),
+            _raw_data_table(raw_df, theme),
         )
 
     # --- CSV export ---
@@ -463,16 +472,9 @@ def register_callbacks(app, raw_df: pd.DataFrame, df: pd.DataFrame, audit: dict)
     @app.callback(
         Output("download-html", "data"),
         Input("btn-export-html", "n_clicks"),
+        State("theme-store", "data"),
         prevent_initial_call=True,
     )
-    def export_html(n_clicks):
-        html_content = plotly_charts.build_html_report(df)
+    def export_html(n_clicks, theme):
+        html_content = plotly_charts.build_html_report(df, theme or "dark")
         return dict(content=html_content, filename="student_dashboard_report.html")
-
-    # --- Theme switcher (clientside would be ideal; simple body class toggle via dummy) ---
-    @app.callback(
-        Output("theme-switch", "label"),
-        Input("theme-switch", "value"),
-    )
-    def update_theme_label(is_light):
-        return "Dark Mode" if is_light else "Light Mode"

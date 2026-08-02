@@ -7,23 +7,24 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 import config
+from theme import PLOTLY_FONT_COLORS, PLOTLY_TEMPLATES, PLOTLY_TITLE_COLORS
 
 
-def _base_layout(fig: go.Figure, title: str) -> go.Figure:
+def _base_layout(fig: go.Figure, title: str, theme: str = "dark") -> go.Figure:
     fig.update_layout(
         title=title,
-        template=config.PLOTLY_TEMPLATE,
+        template=PLOTLY_TEMPLATES.get(theme, "plotly_dark"),
         height=config.CHART_HEIGHT,
         margin=dict(l=40, r=40, t=60, b=40),
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#adb5bd"),
-        title_font=dict(color="#ffffff", size=16),
+        font=dict(color=PLOTLY_FONT_COLORS.get(theme, "#adb5bd")),
+        title_font=dict(color=PLOTLY_TITLE_COLORS.get(theme, "#ffffff"), size=16),
     )
     return fig
 
 
-def build_grade_pie(df: pd.DataFrame) -> go.Figure:
+def build_grade_pie(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     grade_counts = df["Grade"].value_counts().sort_index().reset_index()
     grade_counts.columns = ["Grade", "Count"]
     fig = px.pie(
@@ -32,10 +33,10 @@ def build_grade_pie(df: pd.DataFrame) -> go.Figure:
         values="Count",
         color_discrete_sequence=config.COLOR_SEQUENCE,
     )
-    return _base_layout(fig, "Grade Distribution")
+    return _base_layout(fig, "Grade Distribution", theme)
 
 
-def build_subject_bar(df: pd.DataFrame) -> go.Figure:
+def build_subject_bar(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     subject_avg = df[config.SUBJECT_COLS].mean().round(2).reset_index()
     subject_avg.columns = ["Subject", "Average"]
     fig = px.bar(
@@ -47,10 +48,10 @@ def build_subject_bar(df: pd.DataFrame) -> go.Figure:
         color_discrete_sequence=config.COLOR_SEQUENCE,
     )
     fig.update_traces(textposition="outside")
-    return _base_layout(fig, "Subject-Wise Average Marks")
+    return _base_layout(fig, "Subject-Wise Average Marks", theme)
 
 
-def build_average_histogram(df: pd.DataFrame) -> go.Figure:
+def build_average_histogram(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     fig = px.histogram(
         df,
         x="Average",
@@ -58,10 +59,10 @@ def build_average_histogram(df: pd.DataFrame) -> go.Figure:
         color_discrete_sequence=[config.COLOR_SEQUENCE[1]],
     )
     fig.update_layout(xaxis_title="Average Marks", yaxis_title="Number of Students")
-    return _base_layout(fig, "Distribution of Class Averages")
+    return _base_layout(fig, "Distribution of Class Averages", theme)
 
 
-def build_subject_line(df: pd.DataFrame) -> go.Figure:
+def build_subject_line(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     subject_avg = df[config.SUBJECT_COLS].mean().round(2)
     fig = go.Figure()
     fig.add_trace(
@@ -75,10 +76,10 @@ def build_subject_line(df: pd.DataFrame) -> go.Figure:
         )
     )
     fig.update_layout(xaxis_title="Subject", yaxis_title="Average Marks")
-    return _base_layout(fig, "Subject Performance Trend")
+    return _base_layout(fig, "Subject Performance Trend", theme)
 
 
-def build_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
+def build_correlation_heatmap(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     cols = config.SUBJECT_COLS + ["Attendance", "Average"]
     corr = df[cols].corr()
     fig = px.imshow(
@@ -88,10 +89,10 @@ def build_correlation_heatmap(df: pd.DataFrame) -> go.Figure:
         aspect="auto",
     )
     fig.update_layout(xaxis_title="", yaxis_title="")
-    return _base_layout(fig, "Correlation Heatmap")
+    return _base_layout(fig, "Correlation Heatmap", theme)
 
 
-def build_box_plot(df: pd.DataFrame) -> go.Figure:
+def build_box_plot(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     long_df = df.melt(
         id_vars=["Student"],
         value_vars=config.SUBJECT_COLS,
@@ -105,10 +106,10 @@ def build_box_plot(df: pd.DataFrame) -> go.Figure:
         color="Subject",
         color_discrete_sequence=config.COLOR_SEQUENCE,
     )
-    return _base_layout(fig, "Marks Spread by Subject")
+    return _base_layout(fig, "Marks Spread by Subject", theme)
 
 
-def build_bubble_chart(df: pd.DataFrame) -> go.Figure:
+def build_bubble_chart(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     fig = px.scatter(
         df,
         x="Attendance",
@@ -123,10 +124,10 @@ def build_bubble_chart(df: pd.DataFrame) -> go.Figure:
         xaxis_title="Attendance (%)",
         yaxis_title="Average Marks",
     )
-    return _base_layout(fig, "Attendance vs Performance (Bubble Chart)")
+    return _base_layout(fig, "Attendance vs Performance (Bubble Chart)", theme)
 
 
-def build_area_chart(df: pd.DataFrame) -> go.Figure:
+def build_area_chart(df: pd.DataFrame, theme: str = "dark") -> go.Figure:
     subject_totals = df[config.SUBJECT_COLS].sum()
     cumulative = subject_totals.cumsum()
     fig = go.Figure()
@@ -141,13 +142,14 @@ def build_area_chart(df: pd.DataFrame) -> go.Figure:
         )
     )
     fig.update_layout(xaxis_title="Subject", yaxis_title="Cumulative Total Marks")
-    return _base_layout(fig, "Cumulative Subject Scores (Area Chart)")
+    return _base_layout(fig, "Cumulative Subject Scores (Area Chart)", theme)
 
 
 def build_attendance_scatter(
     df: pd.DataFrame,
     highlight_student: str | None = None,
     topper: str | None = None,
+    theme: str = "dark",
 ) -> go.Figure:
     fig = px.scatter(
         df,
@@ -193,10 +195,10 @@ def build_attendance_scatter(
         xaxis_title="Attendance (%)",
         yaxis_title="Average Marks",
     )
-    return _base_layout(fig, "Attendance vs Average Marks")
+    return _base_layout(fig, "Attendance vs Average Marks", theme)
 
 
-def build_student_bar(df: pd.DataFrame, student: str) -> go.Figure:
+def build_student_bar(df: pd.DataFrame, student: str, theme: str = "dark") -> go.Figure:
     row = df[df["Student"] == student].iloc[0]
     marks = pd.DataFrame(
         {"Subject": config.SUBJECT_COLS, "Marks": [row[s] for s in config.SUBJECT_COLS]}
@@ -210,10 +212,10 @@ def build_student_bar(df: pd.DataFrame, student: str) -> go.Figure:
         color_discrete_sequence=config.COLOR_SEQUENCE,
     )
     fig.update_traces(textposition="outside")
-    return _base_layout(fig, f"{student}'s Marks by Subject")
+    return _base_layout(fig, f"{student}'s Marks by Subject", theme)
 
 
-def build_radar_chart(df: pd.DataFrame, student: str) -> go.Figure:
+def build_radar_chart(df: pd.DataFrame, student: str, theme: str = "dark") -> go.Figure:
     row = df[df["Student"] == student].iloc[0]
     values = [row[s] for s in config.SUBJECT_COLS]
     values_closed = values + [values[0]]
@@ -232,10 +234,12 @@ def build_radar_chart(df: pd.DataFrame, student: str) -> go.Figure:
     fig.update_layout(
         polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
     )
-    return _base_layout(fig, f"{student}'s Subject Profile (Radar)")
+    return _base_layout(fig, f"{student}'s Subject Profile (Radar)", theme)
 
 
-def build_compare_bar(df: pd.DataFrame, student_a: str, student_b: str) -> go.Figure:
+def build_compare_bar(
+    df: pd.DataFrame, student_a: str, student_b: str, theme: str = "dark"
+) -> go.Figure:
     rows = df[df["Student"].isin([student_a, student_b])]
     long_df = rows.melt(
         id_vars=["Student"],
@@ -253,10 +257,12 @@ def build_compare_bar(df: pd.DataFrame, student_a: str, student_b: str) -> go.Fi
         color_discrete_sequence=config.COLOR_SEQUENCE[:2],
     )
     fig.update_traces(textposition="outside")
-    return _base_layout(fig, f"Compare: {student_a} vs {student_b}")
+    return _base_layout(fig, f"Compare: {student_a} vs {student_b}", theme)
 
 
-def build_subject_insight_bar(subject_averages: dict[str, float]) -> go.Figure:
+def build_subject_insight_bar(
+    subject_averages: dict[str, float], theme: str = "dark"
+) -> go.Figure:
     data = pd.DataFrame(
         {"Subject": list(subject_averages.keys()), "Average": list(subject_averages.values())}
     )
@@ -269,18 +275,18 @@ def build_subject_insight_bar(subject_averages: dict[str, float]) -> go.Figure:
         color_discrete_sequence=config.COLOR_SEQUENCE,
     )
     fig.update_traces(textposition="outside")
-    return _base_layout(fig, "Subject-Wise Performance")
+    return _base_layout(fig, "Subject-Wise Performance", theme)
 
 
-def build_html_report(df: pd.DataFrame) -> str:
+def build_html_report(df: pd.DataFrame, theme: str = "dark") -> str:
     """Build a standalone HTML report with key charts."""
     figures = [
-        build_grade_pie(df),
-        build_subject_bar(df),
-        build_average_histogram(df),
-        build_correlation_heatmap(df),
-        build_bubble_chart(df),
-        build_attendance_scatter(df, topper=df.loc[df["Rank"] == 1, "Student"].iloc[0]),
+        build_grade_pie(df, theme),
+        build_subject_bar(df, theme),
+        build_average_histogram(df, theme),
+        build_correlation_heatmap(df, theme),
+        build_bubble_chart(df, theme),
+        build_attendance_scatter(df, topper=df.loc[df["Rank"] == 1, "Student"].iloc[0], theme=theme),
     ]
     html_parts = [
         "<html><head><title>Student Performance Report</title></head><body>",
