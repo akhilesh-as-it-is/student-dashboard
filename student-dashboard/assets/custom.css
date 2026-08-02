@@ -1,0 +1,258 @@
+/* Student Performance Dashboard — custom theme */
+
+:root {
+  --accent: #00bc8c;
+  --accent-glow: rgba(0, 188, 140, 0.25);
+  --card-bg: #1e2226;
+  --sidebar-bg: #15181b;
+  --border: #2b3035;
+  --text-muted: #adb5bd;
+  --text-light: #f8f9fa;
+}
+
+body {
+  background: linear-gradient(135deg, #0d1117 0%, #1a1d20 50%, #0f1419 100%);
+  min-height: 100vh;
+}
+
+.dashboard-container {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.sidebar-col {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  min-height: 100vh;
+  padding: 1.5rem 1rem !important;
+}
+
+.sidebar-panel {
+  position: sticky;
+  top: 0;
+}
+
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+.brand-icon {
+  font-size: 2rem;
+  color: var(--accent);
+}
+
+.brand-title {
+  color: var(--text-light);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.brand-subtitle {
+  color: var(--text-muted);
+}
+
+.sidebar-nav .sidebar-link {
+  color: var(--text-muted) !important;
+  border-radius: 8px;
+  margin-bottom: 0.35rem;
+  padding: 0.65rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav .sidebar-link:hover {
+  background: rgba(0, 188, 140, 0.1);
+  color: var(--accent) !important;
+}
+
+.sidebar-nav .sidebar-link.active {
+  background: var(--accent) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.main-col {
+  padding: 1.5rem 2rem !important;
+}
+
+.page-header {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.page-title {
+  color: var(--text-light);
+  font-weight: 700;
+}
+
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+/* KPI Cards */
+.kpi-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.kpi-icon {
+  font-size: 1.75rem;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.kpi-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-value {
+  color: var(--text-light);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.kpi-card-success .kpi-icon { color: #00bc8c; }
+.kpi-card-danger .kpi-icon { color: #e74c3c; }
+.kpi-card-warning .kpi-icon { color: #f39c12; }
+.kpi-card-info .kpi-icon { color: #3498db; }
+.kpi-card-primary .kpi-icon { color: #375a7f; }
+
+/* Chart cards */
+.chart-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.chart-card .card-header {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-bottom: 1px solid var(--border) !important;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.static-chart-img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Profile card */
+.profile-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+}
+
+.profile-card .card-body {
+  color: var(--text-light);
+}
+
+.topper-badge {
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+/* Filters */
+.filter-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.search-input {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-light) !important;
+}
+
+.dash-dropdown .Select-control,
+.dash-dropdown .Select-menu-outer {
+  background: var(--card-bg) !important;
+  border-color: var(--border) !important;
+  color: var(--text-light) !important;
+}
+
+/* Data table */
+.dash-table-container .dash-spreadsheet-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.info-pre {
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--text-muted);
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  max-height: 300px;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+/* Insight alerts */
+.insight-alert {
+  border-radius: 10px;
+  border: none;
+}
+
+/* At-risk row highlight */
+.at-risk-row {
+  background-color: rgba(231, 76, 60, 0.15) !important;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .sidebar-col {
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main-col {
+    padding: 1rem !important;
+  }
+}
+
+/* Light mode overrides */
+body.light-mode {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+body.light-mode .page-title,
+body.light-mode .brand-title,
+body.light-mode .kpi-value {
+  color: #212529;
+}
+
+body.light-mode .kpi-card,
+body.light-mode .chart-card,
+body.light-mode .profile-card {
+  background: #fff !important;
+}

@@ -1,0 +1,26 @@
+Student,Python,SQL,Power BI,AI,Attendance,Total,Average,Grade,Rank,StrongestSubject,WeakestSubject,IsOutlier
+Queen,94.0,96.0,95.0,98.0,100.0,383.0,95.75,A,1,AI,Python,False
+Xavier,93.0,94.0,97.0,95.0,98.0,379.0,94.75,A,2,Power BI,Python,False
+Grace,92.0,95.0,94.0,96.0,99.0,377.0,94.25,A,3,AI,Python,False
+Sophia,89.0,91.0,93.0,90.0,88.38,363.0,90.75,A,4,Power BI,Python,False
+Kevin,91.0,88.0,90.0,92.0,96.0,361.0,90.25,A,5,AI,SQL,False
+Emma,88.0,90.0,91.0,89.0,97.0,358.0,89.5,B,6,Power BI,Python,False
+Charlie,90.0,85.0,87.0,93.0,98.0,355.0,88.75,B,7,AI,SQL,False
+Nancy,87.0,78.04,89.0,91.0,95.0,345.04,86.26,B,8,AI,SQL,False
+Victor,86.0,83.0,88.0,87.0,94.0,344.0,86.0,B,9,Power BI,SQL,False
+Alice,85.0,78.0,92.0,88.0,95.0,343.0,85.75,B,10,Power BI,SQL,False
+Zara,82.0,85.0,84.0,86.0,92.06,337.0,84.25,B,11,AI,Python,False
+Ivy,84.0,80.0,86.0,85.0,94.0,335.0,83.75,B,12,Power BI,SQL,False
+Laura,83.0,79.0,85.0,84.0,93.0,331.0,82.75,B,13,Power BI,SQL,False
+Ryan,81.0,84.0,83.0,80.83,92.0,328.83,82.21,B,14,SQL,AI,False
+Michael,81.64,82.0,80.0,78.0,88.0,321.64,80.41,B,15,SQL,AI,False
+Jack,78.0,76.0,82.0,81.0,90.0,317.0,79.25,C,16,Power BI,SQL,False
+Uma,78.38,77.0,81.0,80.0,89.0,316.38,79.1,C,17,Power BI,SQL,False
+William,79.0,81.29,76.0,78.0,91.0,314.29,78.57,C,18,SQL,Power BI,False
+Oliver,76.0,73.0,83.79,77.0,90.0,309.79,77.45,C,19,Power BI,SQL,False
+Frank,75.0,74.0,79.0,80.0,91.0,308.0,77.0,C,20,AI,SQL,False
+Peter,69.0,71.0,74.0,84.2,86.0,298.2,74.55,C,21,AI,Python,False
+Bob,72.0,81.0,70.0,75.0,89.0,298.0,74.5,C,22,SQL,Power BI,False
+Thomas,74.0,69.0,72.0,75.0,84.0,290.0,72.5,C,23,AI,SQL,False
+Henry,68.0,72.0,75.0,70.0,87.0,285.0,71.25,C,24,Power BI,Python,False
+David,65.0,70.0,68.0,72.0,85.0,275.0,68.75,D,25,AI,Python,False
